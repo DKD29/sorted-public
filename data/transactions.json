@@ -1,0 +1,67 @@
+{
+    "dhaiwik": [
+        {
+            "timestamp": "2026-08-07T13:24:01.524852",
+            "merchant": "Starbucks",
+            "amount": 120.0,
+            "category": "Food"
+        },
+        {
+            "timestamp": "2026-08-07T13:24:11.123853",
+            "merchant": "Uber",
+            "amount": 47.0,
+            "category": "Transport"
+        },
+        {
+            "timestamp": "2026-08-07T13:24:21.456555",
+            "merchant": "swiggy",
+            "amount": 200.0,
+            "category": "Food"
+        },
+        {
+            "timestamp": "2026-08-07T13:24:33.451987",
+            "merchant": "D mart",
+            "amount": 1423.0,
+            "category": "Groceries"
+        },
+        {
+            "timestamp": "2026-08-07T13:24:52.980663",
+            "merchant": "BESCOM",
+            "amount": 236.0,
+            "category": "Bills"
+        },
+        {
+            "timestamp": "2026-08-10T18:10:38.605901",
+            "merchant": "uber",
+            "amount": 953.0,
+            "category": "Transport"
+        }
+    ],
+    "nav": [
+        {
+            "timestamp": "2026-08-07T13:43:30.854984",
+            "merchant": "Amazon",
+            "amount": 3999.0,
+            "category": "Shopping"
+        },
+        {
+            "timestamp": "2026-08-07T13:43:46.729305",
+            "merchant": "Zara",
+            "amount": 4999.0,
+            "category": "Shopping"
+        },
+        {
+            "timestamp": "2026-08-07T13:44:06.121151",
+            "merchant": "Zepto",
+            "amount": 200.0,
+            "category": "Food"
+        },
+        {
+            "timestamp": "2026-08-07T13:44:16.762420",
+            "merchant": "Ola",
+            "amount": 548.0,
+            "category": "Transport"
+        }
+    ],
+    "notransactions": []
+}

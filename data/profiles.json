@@ -1,0 +1,44 @@
+{
+    "dhaiwik": {
+        "name": "dhaiwik",
+        "age": 13,
+        "user_type": "Student",
+        "goals": [
+            "Track expenses",
+            "Learn finance",
+            "Control spending",
+            "Save money"
+        ],
+        "detail_level": "Balanced",
+        "income_source": "Pocket money"
+    },
+    "nav": {
+        "name": "Nav",
+        "age": 17,
+        "user_type": "Student",
+        "goals": [
+            "Save money",
+            "Learn finance"
+        ],
+        "detail_level": "Balanced",
+        "income_source": "Freelance income"
+    },
+    "notransactions": {
+        "name": "test",
+        "age": 13,
+        "user_type": "Student",
+        "goals": [],
+        "detail_level": "Simple",
+        "income_source": "Pocket money"
+    },
+    "parenttest1": {
+        "name": "d",
+        "age": 43,
+        "user_type": "Working professional",
+        "goals": [
+            "Save money"
+        ],
+        "detail_level": "Detailed",
+        "income_source": "Salary"
+    }
+}
