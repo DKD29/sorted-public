@@ -43,7 +43,7 @@ logo_path = os.path.join(
 if os.path.exists(logo_path):
     st.image(
         logo_path,
-        width=180
+        width=270
     )
 else:
     st.error(
