@@ -7,7 +7,7 @@ from datetime import datetime
 from backend.transactions import (
     get_transactions,
     add_transaction,
-    delete_transaction,T
+    delete_transaction,
     edit_transaction
 )
 
