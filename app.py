@@ -956,7 +956,7 @@ else:
 
                 st.rerun()
 
-        st.divider()
+    st.divider()
 
     # =====================================================
     # ADD TRANSACTION
