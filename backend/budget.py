@@ -76,6 +76,7 @@ def delete_budget(
         budgets
     )
 
+
 def calculate_budget_status(
     username,
     transactions,
@@ -106,9 +107,16 @@ def calculate_budget_status(
 
             transaction_date = transaction["timestamp"][:7]
 
+            # Only count expenses toward budgets.
+            # Old transactions without a "type" field
+            # are treated as expenses.
             if (
                 transaction_date == month
                 and transaction["category"] == category
+                and transaction.get(
+                    "type",
+                    "expense"
+                ) == "expense"
             ):
 
                 spent += float(
@@ -119,13 +127,37 @@ def calculate_budget_status(
             budget_amount - spent
         )
 
-        if spent > budget_amount:
+        # Percentage of the budget already used.
+        if budget_amount > 0:
+
+            percentage_used = (
+                spent / budget_amount
+            ) * 100
+
+        else:
+
+            percentage_used = 0.0
+
+        # Percentage of the budget still remaining.
+        percentage_remaining = max(
+            0.0,
+            100.0 - percentage_used
+        )
+
+        # Determine budget status.
+        if spent >= budget_amount:
 
             status = "Over budget"
 
             over_amount = (
                 spent - budget_amount
             )
+
+        elif percentage_used >= 80:
+
+            status = "Warning"
+
+            over_amount = 0.0
 
         else:
 
@@ -140,6 +172,10 @@ def calculate_budget_status(
             "spent": spent,
 
             "remaining": remaining,
+
+            "percentage_used": percentage_used,
+
+            "percentage_remaining": percentage_remaining,
 
             "status": status,
 

@@ -2,23 +2,35 @@ from backend.database import load_data, save_data
 
 from datetime import datetime
 
+
 def get_transactions(username):
 
     transactions = load_data(
         "transactions.json"
     )
 
-    return transactions.get(
+    user_transactions = transactions.get(
         username,
         []
     )
+
+    # Backward compatibility:
+    # Existing transactions were expenses because
+    # they were created before transaction types existed.
+    for transaction in user_transactions:
+
+        if "type" not in transaction:
+            transaction["type"] = "expense"
+
+    return user_transactions
 
 
 def add_transaction(
     username,
     merchant,
     amount,
-    category
+    category,
+    transaction_type="expense"
 ):
 
     transactions = load_data(
@@ -33,7 +45,8 @@ def add_transaction(
             "timestamp": datetime.now().isoformat(),
             "merchant": merchant,
             "amount": float(amount),
-            "category": category
+            "category": category,
+            "type": transaction_type
         }
     )
 
@@ -70,7 +83,8 @@ def edit_transaction(
     index,
     merchant,
     amount,
-    category
+    category,
+    transaction_type="expense"
 ):
 
     transactions = load_data(
@@ -92,7 +106,9 @@ def edit_transaction(
 
             "amount": float(amount),
 
-            "category": category
+            "category": category,
+
+            "type": transaction_type
 
         }
 
