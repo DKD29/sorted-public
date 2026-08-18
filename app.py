@@ -11,7 +11,11 @@ from backend.transactions import (
     edit_transaction
 )
 
-from backend.categories import CATEGORIES
+from backend.categories import (
+    CATEGORIES,
+    EXPENSE_CATEGORIES,
+    INCOME_CATEGORIES
+)
 
 from backend.auth import (
     create_user,
@@ -33,22 +37,6 @@ from backend.budget import (
 
 import os
 
-logo_path = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "assets",
-    "images",
-    "logo.png"
-)
-
-if os.path.exists(logo_path):
-    st.image(
-        logo_path,
-        width=270
-    )
-else:
-    st.error(
-        f"Logo not found at: {logo_path}"
-    )
 # =========================================================
 # PAGE CONFIGURATION
 # =========================================================
@@ -59,6 +47,29 @@ st.set_page_config(
     layout="wide"
 )
 
+# =========================================================
+# SO₹TED LOGO
+# =========================================================
+
+logo_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "assets",
+    "images",
+    "logo.png"
+)
+
+if os.path.exists(logo_path):
+
+    st.image(
+        logo_path,
+        width=300
+    )
+
+else:
+
+    st.error(
+        f"Logo not found at: {logo_path}"
+    )
 
 # =========================================================
 # SO₹TED UI THEME
@@ -92,7 +103,6 @@ st.markdown(
     h1, h2, h3, h4, h5, h6 {{
         color: {TEXT} !important;
     }}
-
 
     /* =====================================================
        SIDEBAR
@@ -562,44 +572,30 @@ else:
     with col1:
 
         st.metric(
-            "Total Spending",
-            f"₹{analysis['total_spending']:.2f}"
+            "Total Income",
+            f"₹{analysis['total_income']:.2f}"
         )
 
     with col2:
 
         st.metric(
-            "Transactions",
-            len(transactions)
+            "Total Spending",
+            f"₹{analysis['total_spending']:.2f}"
         )
 
     with col3:
 
-        largest_expense = analysis["largest_expense"]
-
-        if largest_expense["merchant"] is not None:
-
-            st.metric(
-                "Largest Expense",
-                f"₹{largest_expense['amount']:.2f}"
-            )
-
-        else:
-
-            st.metric(
-                "Largest Expense",
-                "₹0.00"
-            )
+        st.metric(
+            "Net Balance",
+            f"₹{analysis['net_balance']:.2f}"
+        )
 
     with col4:
 
         st.metric(
-            "Top Category",
-            analysis["highest_category"]
-            if analysis["highest_category"] is not None
-            else "None"
+            "Transactions",
+            len(transactions)
         )
-
 
     st.divider()
 
@@ -676,6 +672,13 @@ else:
         daily_spending = {}
 
         for transaction in transactions:
+
+            if transaction.get(
+                "type",
+                "expense"
+            ) != "expense":
+
+                continue
 
             dt = datetime.fromisoformat(
                 transaction["timestamp"]
@@ -853,8 +856,29 @@ else:
             )
 
             st.write(
-                f"Remaining: ₹{data['remaining']:.2f}"
+                f"Remaining: ₹{max(data['remaining'], 0):.2f}"
             )
+
+            # -------------------------------------------------
+            # BUDGET PROGRESS
+            # -------------------------------------------------
+
+            progress = min(
+                data["percentage_used"] / 100,
+                1.0
+            )
+
+            st.progress(
+                progress
+            )
+
+            st.caption(
+                f"{data['percentage_used']:.1f}% of budget used"
+            )
+
+            # -------------------------------------------------
+            # OVER BUDGET
+            # -------------------------------------------------
 
             if data["status"] == "Over budget":
 
@@ -867,19 +891,53 @@ else:
                         border-radius: 8px;
                         border: 2px solid #8F0000;
                         margin: 8px 0;
-                        font-weight: 600;	
+                        font-weight: 600;
                     ">
-                        {category} is over budget by ₹{data['over_amount']:.2f}.
+                        {category} is over budget by
+                        ₹{data['over_amount']:.2f}.
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
+
+            # -------------------------------------------------
+            # 80% WARNING
+            # -------------------------------------------------
+
+            elif data["status"] == "Warning":
+
+                st.markdown(
+                    f"""
+                    <div style="
+                        background-color: #8F0000;
+                        color: #FFFFE4;
+                        padding: 12px 16px;
+                        border-radius: 8px;
+                        border: 2px solid #8F0000;
+                        margin: 8px 0;
+                        font-weight: 600;
+                    ">
+                        You have only
+                        {data['percentage_remaining']:.1f}%
+                        of your {category} budget left.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            # -------------------------------------------------
+            # WITHIN BUDGET
+            # -------------------------------------------------
 
             else:
 
                 st.success(
                     f"{category} is within budget."
                 )
+
+            # -------------------------------------------------
+            # DELETE BUDGET
+            # -------------------------------------------------
 
             if st.button(
                 f"Delete {category} Budget",
@@ -898,8 +956,7 @@ else:
 
                 st.rerun()
 
-    st.divider()
-
+        st.divider()
 
     # =====================================================
     # ADD TRANSACTION
@@ -909,38 +966,70 @@ else:
         "Add Transaction"
     )
 
+    transaction_type = st.selectbox(
+        "Transaction Type",
+        [
+            "Expense",
+            "Income"
+        ],
+        key="transaction_type"
+    )
+
     merchant = st.text_input(
-        "Merchant"
+        "Merchant / Source"
     )
 
     amount = st.number_input(
         "Amount",
-        min_value=0.0
+        min_value=0.0,
+        key="transaction_amount"
     )
+
+    if transaction_type == "Expense":
+
+        category_options = EXPENSE_CATEGORIES
+
+    else:
+
+        category_options = INCOME_CATEGORIES
 
     category = st.selectbox(
         "Category",
-        CATEGORIES
+        category_options,
+        key="transaction_category"
     )
 
     if st.button(
         "Add Transaction"
     ):
 
-        add_transaction(
-            username,
-            merchant,
-            amount,
-            category
-        )
+        if amount <= 0:
 
-        st.success(
-            "Transaction added"
-        )
+            st.error(
+                "Amount must be greater than ₹0."
+            )
 
-        st.rerun()
+        elif merchant.strip() == "":
 
+            st.error(
+                "Please enter a merchant or income source."
+            )
 
+        else:
+
+            add_transaction(
+                username,
+                merchant,
+                amount,
+                category,
+                transaction_type.lower()
+            )
+
+            st.success(
+                f"{transaction_type} added successfully."
+            )
+
+            st.rerun()
     st.divider()
 
     # =====================================================
@@ -1104,11 +1193,27 @@ else:
                 transaction["timestamp"]
             )
 
+            transaction_type = transaction.get(
+                "type",
+                "expense"
+            )
+
+            if transaction_type == "income":
+
+                type_label = "Income"
+                sign = "+"
+
+            else:
+
+                type_label = "Expense"
+                sign = "-"
+
             st.write(
                 f"{dt.strftime('%d %b %Y %I:%M %p')} | "
                 f"{transaction['merchant']} | "
-                f"₹{transaction['amount']:.2f} | "
-                f"{transaction['category']}"
+                f"{sign}₹{transaction['amount']:.2f} | "
+                f"{transaction['category']} | "
+                f"{type_label}"
             )
 
             col1, col2 = st.columns(2)
@@ -1122,7 +1227,7 @@ else:
 
                     st.session_state.editing_transaction = index
 
-                    st.rerun()
+                    st.rerun
 
             with col2:
 
@@ -1159,23 +1264,63 @@ else:
                 "Edit Transaction"
             )
 
+            current_type = transaction.get(
+                "type",
+                "expense"
+            )
+
+            current_type_display = (
+                "Income"
+                if current_type == "income"
+                else "Expense"
+            )
+
+            edit_type = st.selectbox(
+                "Transaction Type",
+                [
+                    "Expense",
+                    "Income"
+                ],
+                index=(
+                    1
+                    if current_type_display == "Income"
+                    else 0
+                ),
+                key=f"edit_type_{index}"
+            )
+
             edit_merchant = st.text_input(
-                "Merchant",
+                "Merchant / Source",
                 value=transaction["merchant"],
                 key=f"edit_merchant_{index}"
             )
 
             edit_amount = st.number_input(
                 "Amount",
+                min_value=0.0,
                 value=float(transaction["amount"]),
                 key=f"edit_amount_{index}"
             )
 
+            if edit_type == "Expense":
+
+                edit_categories = EXPENSE_CATEGORIES
+
+            else:
+
+                edit_categories = INCOME_CATEGORIES
+
+            current_category = transaction["category"]
+
+            if current_category not in edit_categories:
+
+                current_category = "Other"
+
             edit_category = st.selectbox(
                 "Category",
-                CATEGORIES,
-                index=CATEGORIES.index(
-                    transaction["category"]
+                edit_categories,
+                index=edit_categories.index(
+                    current_category
                 ),
                 key=f"edit_category_{index}"
             )
@@ -1184,21 +1329,36 @@ else:
                 "Save Changes"
             ):
 
-                edit_transaction(
-                    username,
-                    index,
-                    edit_merchant,
-                    edit_amount,
-                    edit_category
-                )
+                if edit_amount <= 0:
 
-                st.session_state.editing_transaction = None
+                    st.error(
+                        "Amount must be greater than ₹0."
+                    )
 
-                st.success(
-                    "Transaction updated"
-                )
+                elif edit_merchant.strip() == "":
 
-                st.rerun()
+                    st.error(
+                        "Please enter a merchant or income source."
+                    )
+
+                else:
+
+                    edit_transaction(
+                        username,
+                        index,
+                        edit_merchant,
+                        edit_amount,
+                        edit_category,
+                        edit_type.lower()
+                    )
+
+                    st.session_state.editing_transaction = None
+
+                    st.success(
+                        "Transaction updated"
+                    )
+
+                    st.rerun()
 
         else:
 
