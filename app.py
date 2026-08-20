@@ -554,6 +554,79 @@ else:
 
     st.divider()
 
+    # =====================================================
+    # ADD TRANSACTION
+    # =====================================================
+
+    st.subheader(
+        "Add Transaction"
+    )
+
+    transaction_type = st.selectbox(
+        "Transaction Type",
+        [
+            "Expense",
+            "Income"
+        ],
+        key="transaction_type"
+    )
+
+    merchant = st.text_input(
+        "Merchant / Source"
+    )
+
+    amount = st.number_input(
+        "Amount",
+        min_value=0.0,
+        key="transaction_amount"
+    )
+
+    if transaction_type == "Expense":
+
+        category_options = EXPENSE_CATEGORIES
+
+    else:
+
+        category_options = INCOME_CATEGORIES
+
+    category = st.selectbox(
+        "Category",
+        category_options,
+        key="transaction_category"
+    )
+
+    if st.button(
+        "Add Transaction"
+    ):
+
+        if amount <= 0:
+
+            st.error(
+                "Amount must be greater than ₹0."
+            )
+
+        elif merchant.strip() == "":
+
+            st.error(
+                "Please enter a merchant or income source."
+            )
+
+        else:
+
+            add_transaction(
+                username,
+                merchant,
+                amount,
+                category,
+                transaction_type.lower()
+            )
+
+            st.success(
+                f"{transaction_type} added successfully."
+            )
+
+            st.rerun()
+    st.divider()
 
     # =====================================================
     # DASHBOARD SUMMARY
@@ -958,119 +1031,8 @@ else:
 
     st.divider()
 
-    # =====================================================
-    # ADD TRANSACTION
-    # =====================================================
 
-    st.subheader(
-        "Add Transaction"
-    )
-
-    transaction_type = st.selectbox(
-        "Transaction Type",
-        [
-            "Expense",
-            "Income"
-        ],
-        key="transaction_type"
-    )
-
-    merchant = st.text_input(
-        "Merchant / Source"
-    )
-
-    amount = st.number_input(
-        "Amount",
-        min_value=0.0,
-        key="transaction_amount"
-    )
-
-    if transaction_type == "Expense":
-
-        category_options = EXPENSE_CATEGORIES
-
-    else:
-
-        category_options = INCOME_CATEGORIES
-
-    category = st.selectbox(
-        "Category",
-        category_options,
-        key="transaction_category"
-    )
-
-    if st.button(
-        "Add Transaction"
-    ):
-
-        if amount <= 0:
-
-            st.error(
-                "Amount must be greater than ₹0."
-            )
-
-        elif merchant.strip() == "":
-
-            st.error(
-                "Please enter a merchant or income source."
-            )
-
-        else:
-
-            add_transaction(
-                username,
-                merchant,
-                amount,
-                category,
-                transaction_type.lower()
-            )
-
-            st.success(
-                f"{transaction_type} added successfully."
-            )
-
-            st.rerun()
-    st.divider()
-
-    # =====================================================
-    # SO₹TED ADVISOR
-    # =====================================================
-
-    if APP_MODE == "local":
-
-        st.subheader(
-            "SO₹TED Advisor"
-        )
-
-        if len(transactions) == 0:
-
-            st.info(
-                "Add some transactions first so SO₹TED AI can analyze your spending."
-            )
-
-        else:
-
-            if st.button(
-                "Generate Financial Advice"
-            ):
-
-                from backend.advisor import generate_advice
-
-                with st.spinner(
-                    "SO₹TED AI is sorting..."
-                ):
-
-                    advice = generate_advice(
-                        username,
-                        profile,
-                        transactions
-                    )
-
-                st.markdown(
-                    advice
-                )
-        st.divider()
-    
+        
     # =====================================================
     # TRANSACTION HISTORY
     # =====================================================
@@ -1363,3 +1325,43 @@ else:
         else:
 
             st.session_state.editing_transaction = None
+    
+    st.divider()
+            
+    # =====================================================
+    # SO₹TED ADVISOR
+    # =====================================================
+
+    if APP_MODE == "local":
+
+        st.subheader(
+            "SO₹TED Advisor"
+        )
+
+        if len(transactions) == 0:
+
+            st.info(
+                "Add some transactions first so SO₹TED AI can analyze your spending."
+            )
+
+        else:
+
+            if st.button(
+                "Generate Financial Advice"
+            ):
+
+                from backend.advisor import generate_advice
+
+                with st.spinner(
+                    "SO₹TED AI is sorting..."
+                ):
+
+                    advice = generate_advice(
+                        username,
+                        profile,
+                        transactions
+                    )
+
+                st.markdown(
+                    advice
+                )
