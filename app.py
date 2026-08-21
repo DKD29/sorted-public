@@ -75,7 +75,7 @@ else:
 # SO₹TED UI THEME
 # =========================================================
 
-PRIMARY = "#004466"
+PRIMARY = "#014574"
 TEXT = "#FFFFE4"
 ACCENT = "#FACC62"
 WARNING = "#8F0000"
